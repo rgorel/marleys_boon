@@ -4,7 +4,7 @@
   <div class="row">
     <div class="card-deck">
       <% result.recipes.each do |recipe| %>
-        <div class="col-sm-4 mt-5">
+        <div class="col-sm-4">
           <a href="<%= url("/recipe/#{recipe.id}") %>">
             <div class="card">
               <img class="card-img-top" src="<%= result.photo_for(recipe).url %>" alt="<%= result.photo_for(recipe).title %>">
