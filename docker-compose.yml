@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  app:
+  base: &base
     build: .
     ports:
       - '3000:3000'
@@ -14,7 +14,14 @@ services:
       - MB_CONTENTFUL_SPACE_ID
       - MB_CONTENTFUL_ENVIRONMENT_ID
       - MB_CONTENTFUL_ACCESS_TOKEN
+
+  app:
+    <<: *base
     command: ['./bin/start']
+
+  tests:
+    <<: *base
+    command: ['./bin/tests']
 
 volumes:
   marleys_boon_gems:

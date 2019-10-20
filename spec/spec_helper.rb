@@ -14,8 +14,6 @@
 #
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 
-require 'pry-byebug' # TODO remove !!!!!1
-
 require 'webmock/rspec'
 
 $:.unshift File.dirname(File.expand_path(__dir__))

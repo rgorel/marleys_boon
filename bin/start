@@ -1,3 +1,2 @@
 #!/usr/bin/env bash
-bundle check || bundle install
-bundle exec rackup -p 3000 -o 0.0.0.0
+./bin/setup && bundle exec rackup -p 3000 -o 0.0.0.0
