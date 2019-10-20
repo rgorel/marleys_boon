@@ -1,0 +1,15 @@
+  <h3><%= result.recipe.title %></h3>
+  <% if result.photo %>
+
+    <img width="500" class="float-right ml-2 mt-3" src="<%= result.photo.url %>" alt="<%= result.photo.title %>">
+  <% end %>
+  <% if result.chef %>
+    <p><small><b>Chef:</b> <%= result.chef.name %></small></p>
+  <% end %>
+  <p><%= result.recipe.description %></p>
+
+  <p>
+  <% result.tags.each do |tag| %>
+    <span class="badge badge-secondary"><%= tag.name %></span>
+  <% end if result.tags %>
+  </p>

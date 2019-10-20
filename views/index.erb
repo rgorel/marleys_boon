@@ -1,0 +1,27 @@
+<% if result.recipes.empty? %>
+  <p>This website has run out of recipes. Please check <a href="http://marleyspoon.com">somewhere else</a>.</p>
+<% else %>
+  <div class="row">
+    <div class="card-deck">
+      <% result.recipes.each do |recipe| %>
+        <div class="col-sm-4 mt-5">
+          <a href="<%= url("/recipe/#{recipe.id}") %>">
+            <div class="card">
+              <img class="card-img-top" src="<%= result.photo_for(recipe).url %>" alt="<%= result.photo_for(recipe).title %>">
+              <div class="card-body">
+                <h5 class="card-title"><%= recipe.title %></h5>
+              </div>
+            </div>
+          </a>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+<% if prev_page_skip(result) %>
+  <a href="<%= url("/?skip=#{prev_page_skip(result)}") %>" class="btn btn-lg btn-primary my-5 float-left">Previous page</a>
+<% end %>
+
+<% if next_page_skip(result) %>
+  <a href="<%= url("/?skip=#{next_page_skip(result)}") %>" class="btn btn-lg btn-primary my-5 float-right">Next page</a>
+<% end %>

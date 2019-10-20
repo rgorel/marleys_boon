@@ -14,7 +14,7 @@ class MarleysBoonApp < Sinatra::Application
     access_token: ENV.fetch('MB_CONTENTFUL_ACCESS_TOKEN'),
   }
 
-  set :recipes_per_page, 5
+  set :recipes_per_page, 3
 
   set :logger, Logger.new(STDOUT, Logger::DEBUG)
 
@@ -29,18 +29,30 @@ class MarleysBoonApp < Sinatra::Application
   end
 
   get '/' do
-    skip = params['skip'] || 1
+    skip = params['skip'] || 0
     result = self.class.recipe_fetcher.recipes(skip: skip, limit: settings.recipes_per_page)
     erb :index, locals: { result: result }
   end
 
-  get '/:id' do
+  get '/recipe/:id' do
     result = self.class.recipe_fetcher.recipe(params['id'])
 
     if result.failure? && result.error == :not_found
       not_found
     else
       erb :show, locals: { result: result }
+    end
+  end
+
+  helpers do
+    def next_page_skip(result)
+      next_skip = result.skip + result.limit
+      next_skip if next_skip < result.total
+    end
+
+    def prev_page_skip(result)
+      prev_skip = result.skip - result.limit
+      prev_skip if prev_skip >= 0
     end
   end
 end
