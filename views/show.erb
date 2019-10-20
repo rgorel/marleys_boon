@@ -6,7 +6,7 @@
   <% if result.chef %>
     <p><small><b>Chef:</b> <%= result.chef.name %></small></p>
   <% end %>
-  <p><%= result.recipe.description %></p>
+  <p><%= parse_text result.recipe.description %></p>
 
   <p>
   <% result.tags.each do |tag| %>

@@ -1,5 +1,6 @@
 require 'sinatra/base'
 require 'sinatra/custom_logger'
+require 'kramdown'
 require 'logger'
 require 'erb'
 
@@ -53,6 +54,10 @@ class MarleysBoonApp < Sinatra::Application
     def prev_page_skip(result)
       prev_skip = result.skip - result.limit
       prev_skip if prev_skip >= 0
+    end
+
+    def parse_text(text)
+      Kramdown::Document.new(text).to_html
     end
   end
 end

@@ -51,7 +51,7 @@ class RecipeFetcher
       )
     end
 
-    photos = result.body['includes'].fetch('Asset').map { |row| decorate_photo(row) }
+    photos = result.body.fetch('includes', {}).fetch('Asset', []).map { |row| decorate_photo(row) }
 
     CollectionResult.new(
       total: result.body.fetch('total'),
