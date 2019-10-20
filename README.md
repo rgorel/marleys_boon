@@ -54,4 +54,4 @@ Run tests:
 
 ## Usage
 
-One the app starts, visit http://localhost:3000/ in your browser.
+Once the app starts, visit http://localhost:3000/ in your browser.
