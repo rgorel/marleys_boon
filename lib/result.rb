@@ -1,4 +1,11 @@
 module Result
+  module FrozenStruct
+    def initialize(**)
+      super
+      freeze
+    end
+  end
+
   Failure = Struct.new(:error) do
     def failure?
       true
@@ -14,12 +21,9 @@ module Result
       Failure.new(error).freeze
     end
 
-    def Success(*fields)
+    def Success(*fields, &block)
       Struct.new(*fields, keyword_init: true) do
-        def initialize(**)
-          super
-          freeze
-        end
+        include FrozenStruct
 
         def failure?
           false
@@ -28,15 +32,15 @@ module Result
         def success?
           true
         end
+
+        class_eval(&block) if block
       end
     end
 
-    def Model(*fields)
+    def Model(*fields, &block)
       Struct.new(*fields, keyword_init: true) do
-        def initialize(**)
-          super
-          freeze
-        end
+        include FrozenStruct
+        class_eval(&block) if block
       end
     end
   end

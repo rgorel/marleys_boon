@@ -19,7 +19,7 @@ class ContentfulAPI
   end
 
   def get(path, params)
-    request(Net::HTTP::Get, url, params)
+    request(Net::HTTP::Get, path, params)
   end
 
   private
@@ -27,18 +27,26 @@ class ContentfulAPI
   attr_reader :base_url, :access_token, :logger
 
   def request(klass, path, params)
-    uri = URI("#{base_url}/#{path}")
+    uri = URI(base_url + path)
     uri.query = URI.encode_www_form(params)
 
     request_object = klass.new(uri)
     request_object['Authorization'] = "Bearer #{access_token}"
 
+    log("Request: #{klass.name} #{uri}")
+
     response = Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|
       http.request(request_object)
     end
 
-    parsed_body = JSON.parse(response.body) if response.body
+    log("Response: #{response.code} Body: #{response.body && response.body[0..100]}")
+
+    parsed_body = JSON.parse(response.body) if response.body && !response.body.empty?
 
     Response.new(response.code, parsed_body).freeze
+  end
+
+  def log(message)
+    logger.info("[Contentful API] #{message}")
   end
 end

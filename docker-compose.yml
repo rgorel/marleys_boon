@@ -6,7 +6,7 @@ services:
     ports:
       - '3000:3000'
     volumes:
-      - /usr/local/bundle
+      - marleys_boon_gems:/usr/local/bundle
       - .:/app
     env_file: .env
     working_dir: /app
@@ -15,3 +15,6 @@ services:
       - MB_CONTENTFUL_ENVIRONMENT_ID
       - MB_CONTENTFUL_ACCESS_TOKEN
     command: ['./bin/start']
+
+volumes:
+  marleys_boon_gems:

@@ -1,3 +1,5 @@
+require 'logger'
+
 require_relative 'contentful_api'
 require_relative 'result'
 
@@ -6,11 +8,25 @@ class RecipeFetcher
 
   NotFoundFailure = Result.Failure(:not_found)
 
-  CollectionResult = Result.Success(:total, :skip, :limit, :recipes, :photos)
+  CollectionResult = Result.Success(:total, :skip, :limit, :recipes, :photos) do
+    def initialize(photos:, **)
+      @photos_hash = photos.map { |photo| [photo.id, photo] }.to_h
+      super
+    end
+
+    def photo_for(recipe)
+      photos_hash[recipe.photo_id]
+    end
+
+    private
+
+    attr_reader :photos_hash
+  end
+
   SingleResult = Result.Success(:recipe, :photo, :tags, :chef)
 
-  Recipe = Result.Model(:id, :title, :description)
-  Photo = Result.Model(:title, :url)
+  Recipe = Result.Model(:id, :title, :description, :photo_id)
+  Photo = Result.Model(:id, :title, :url)
   Tag = Result.Model(:name)
   Chef = Result.Model(:name)
 
@@ -30,7 +46,8 @@ class RecipeFetcher
     recipes = result.body.fetch('items').map do |row|
       Recipe.new(
         id: row['sys'].fetch('id'),
-        title: row['fields'].fetch('title')
+        title: row['fields'].fetch('title'),
+        photo_id: row.dig('fields', 'photo', 'sys', 'id')
       )
     end
 
@@ -49,20 +66,19 @@ class RecipeFetcher
     result = get_entries(
       'sys.id' => id,
       include: 2,
+      content_type: 'recipe',
       select: 'fields.title,fields.photo,fields.description,fields.tags,fields.chef'
     )
 
     recipe = result.body.fetch('items').first&.then do |row|
       Recipe.new(
         id:  id,
-        title: raw_recipe['fields'].fetch('title'),
-        description: raw_recipe['fields'].fetch('description'),
+        title: row['fields'].fetch('title'),
+        description: row['fields'].fetch('description'),
       )
     end
 
-    unless recipe
-      return NotFoundFailure
-    end
+    return NotFoundFailure unless recipe
 
     photo = result.body.fetch('includes').fetch('Asset', []).first&.then do |row|
       decorate_photo(row)
@@ -75,7 +91,7 @@ class RecipeFetcher
     end
 
     chef = select_entries(entries, 'chef').first&.then do |row|
-      Chef.new(name: raw_chef['fields'].fetch('name'))
+      Chef.new(name: row['fields'].fetch('name'))
     end
 
     SingleResult.new(
@@ -92,6 +108,7 @@ class RecipeFetcher
 
   def decorate_photo(row)
     Photo.new(
+      id: row['sys'].fetch('id'),
       title: row['fields'].fetch('title'),
       url: row.dig('fields', 'file').fetch('url')
     )
@@ -105,11 +122,7 @@ class RecipeFetcher
 
   def get_entries(params)
     result = contentful_api.get('/entries', params)
-
-    unless result.code.start_with?('2')
-      raise FetchFailedError
-    end
-
+    raise FetchFailedError unless result.success?
     result
   end
 end
